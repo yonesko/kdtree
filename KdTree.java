@@ -4,6 +4,7 @@
  *  Description:
  **************************************************************************** */
 
+import edu.princeton.cs.algs4.Interval1D;
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.Queue;
 import edu.princeton.cs.algs4.RectHV;
@@ -153,21 +154,24 @@ public class KdTree {
         }
 
         if (n.d == 0) {
-            if (rect.xmax() < n.point.x()) {
+            if(rect.xmax()<n.point.x()){
                 _range(n.left, rect, points);
-            }
-            if (rect.xmin() >= n.point.x()) {
+            } else if(rect.xmin()>=n.point.x()){
+                _range(n.right, rect, points);
+            } else {
+                _range(n.left, rect, points);
                 _range(n.right, rect, points);
             }
         } else {
-            if (rect.ymax() < n.point.y()) {
+            if(rect.ymax()<n.point.y()){
                 _range(n.left, rect, points);
-            }
-            if (rect.ymin() >= n.point.y()) {
+            } else if(rect.ymin()>=n.point.y()){
+                _range(n.right, rect, points);
+            } else {
+                _range(n.left, rect, points);
                 _range(n.right, rect, points);
             }
         }
-
     }
 
     public Point2D nearest(Point2D p) {
@@ -181,5 +185,7 @@ public class KdTree {
         if (!kdTree.contains(new Point2D(1, 1))) {
             throw new AssertionError();
         }
+
+        kdTree.range(new RectHV(1,1,3,3)) ;
     }
 }
