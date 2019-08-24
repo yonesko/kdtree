@@ -94,20 +94,38 @@ public class KdTree {
 
     public boolean contains(Point2D p) {
         if (p == null) throw new IllegalArgumentException();
-        if (root==null) return false;
-        Queue<Node> queue = new Queue<>();
-        queue.enqueue(root);
+        if (root == null) return false;
 
-        while (!queue.isEmpty()) {
-            Node node = queue.dequeue();
-            if (node.point.equals(p)) {
+        for (Node i = root; ; ) {
+            if (i.point.equals(p)) {
                 return true;
             }
-            if (node.left != null) queue.enqueue(node.left);
-            if (node.right != null) queue.enqueue(node.right);
+            if (i.d == 0) {
+                if (p.x() < i.point.x()) {
+                    if (i.left == null) {
+                        return false;
+                    }
+                    i = i.left;
+                } else {
+                    if (i.right == null) {
+                        return false;
+                    }
+                    i = i.right;
+                }
+            } else {
+                if (p.y() < i.point.y()) {
+                    if (i.left == null) {
+                        return false;
+                    }
+                    i = i.left;
+                } else {
+                    if (i.right == null) {
+                        return false;
+                    }
+                    i = i.right;
+                }
+            }
         }
-
-        return false;
     }         // does the set contain point p?
 
     public void draw() {
@@ -134,32 +152,34 @@ public class KdTree {
             points.add(n.point);
         }
 
-        _range(n.left, rect, points);
-        _range(n.right, rect, points);
-
-        /*
         if (n.d == 0) {
             if (rect.xmax() < n.point.x()) {
                 _range(n.left, rect, points);
-            } else {
+            }
+            if (rect.xmin() >= n.point.x()) {
                 _range(n.right, rect, points);
             }
         } else {
             if (rect.ymax() < n.point.y()) {
                 _range(n.left, rect, points);
-            } else {
+            }
+            if (rect.ymin() >= n.point.y()) {
                 _range(n.right, rect, points);
             }
         }
-        */
+
     }
 
     public Point2D nearest(Point2D p) {
         if (p == null) throw new IllegalArgumentException();
         throw new UnsupportedOperationException("nearest");
-    }       // a nearest neighbor in the set to point p; null if the set is empty
+    }
 
     public static void main(String[] args) {
-//empty
-    }              // unit testing of the methods (optional)
+        KdTree kdTree = new KdTree();
+        kdTree.insert(new Point2D(1, 1));
+        if (!kdTree.contains(new Point2D(1, 1))) {
+            throw new AssertionError();
+        }
+    }
 }
