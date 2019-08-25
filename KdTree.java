@@ -182,41 +182,30 @@ public class KdTree {
     }
 
     public Point2D nearest(Point2D p) {
+        class SNN {
+            private final Node node;
+            private final double dist;
+
+            SNN(Node node, double dist) {
+                this.node = node;
+                this.dist = dist;
+            }
+        }
         if (p == null) throw new IllegalArgumentException();
         if (root == null) return null;
         Point2D champ = null;
         double dist = Double.MAX_VALUE;
-        Stack<Node> stack = new Stack<>();
-        stack.push(root);
-        while (!stack.isEmpty()) {
-            Node node = stack.pop();
-            if (node == null) continue;
-            double curDist = p.distanceSquaredTo(node.point);
-            if (curDist < dist) {
-                champ = node.point;
-                dist = curDist;
-            }
+        Stack<SNN> stack = new Stack<>();
 
-            if (node.d == 0) {
-                if (p.x() < node.point.x()) {
-                    stack.push(node.left);
-                    stack.push(node.right);
-                }
-                else {
-                    stack.push(node.right);
-                    stack.push(node.left);
-                }
+        if (root.d == 0) {
+            if(p.x()<root.point.x()) {
+                stack.push(new SNN(root.left, 0));
+                stack.push(new SNN(root.right, 0));
             }
-            else {
-                if (p.y() < node.point.y()) {
-                    stack.push(node.left);
-                    stack.push(node.right);
-                }
-                else {
-                    stack.push(node.right);
-                    stack.push(node.left);
-                }
-            }
+        }
+
+        while (!stack.isEmpty()) {
+
         }
 
         return champ;
