@@ -6,7 +6,6 @@
 
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.RectHV;
-import edu.princeton.cs.algs4.Stack;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -181,87 +180,42 @@ public class KdTree {
         }
     }
 
-    public Point2D nearest(Point2D p) {
-        class SNN {
-            private final Node node;
-            private final double dist;
+    private class Context {
+        private Point2D champ;
+        private double dist;
+        private final Point2D p;
 
-            SNN(Node node, double dist) {
-                this.node = node;
-                this.dist = dist;
-            }
+        Context(Point2D champ, double dist, Point2D p) {
+            this.champ = champ;
+            this.dist = dist;
+            this.p = p;
         }
+    }
+
+    public Point2D nearest(Point2D p) {
         if (p == null) throw new IllegalArgumentException();
         if (root == null) return null;
-        Point2D champ = root.point;
-        double dist = root.point.distanceSquaredTo(p);
-        Stack<SNN> stack = new Stack<>();
+        Context context = new Context(null, Double.MAX_VALUE, p);
+        _nearest(root, context);
+        return context.champ;
+    }
 
-        if (root.d == 0) {
-            if (p.x() < root.point.x()) {
-                stack.push(new SNN(root.left, 0));
-                stack.push(new SNN(root.right,
-                                   p.distanceSquaredTo(new Point2D(root.point.x(), p.y()))));
-            }
-            else {
-                stack.push(new SNN(root.right, 0));
-                stack.push(new SNN(root.left,
-                                   p.distanceSquaredTo(new Point2D(root.point.x(), p.y()))));
-            }
-        }
-        else {
-            if (p.y() < root.point.y()) {
-                stack.push(new SNN(root.left, 0));
-                stack.push(new SNN(root.right,
-                                   p.distanceSquaredTo(new Point2D(p.x(), root.point.y()))));
-            }
-            else {
-                stack.push(new SNN(root.right, 0));
-                stack.push(new SNN(root.left,
-                                   p.distanceSquaredTo(new Point2D(p.x(), root.point.y()))));
-            }
+    private void _nearest(Node root, Context context) {
+        if (root == null) return;
+        double curDist = root.point.distanceSquaredTo(context.p);
+        if (curDist < context.dist) {
+            context.champ = root.point;
+            context.dist = curDist;
         }
 
-        while (!stack.isEmpty()) {
-            SNN snn = stack.pop();
-            if (snn.node == null) continue;
-            if (snn.dist > dist) continue;
-            double curDist = snn.node.point.distanceSquaredTo(p);
-            if (curDist < dist) {
-                dist = curDist;
-                champ = snn.node.point;
-            }
-            if (snn.node.d == 0) {
-                if (p.x() < snn.node.point.x()) {
-                    stack.push(new SNN(snn.node.left, 0));
-                    stack.push(new SNN(snn.node.right,
-                                       p.distanceSquaredTo(
-                                               new Point2D(snn.node.point.x(), p.y()))));
-                }
-                else {
-                    stack.push(new SNN(snn.node.right, 0));
-                    stack.push(new SNN(snn.node.left,
-                                       p.distanceSquaredTo(
-                                               new Point2D(snn.node.point.x(), p.y()))));
-                }
-            }
-            else {
-                if (p.y() < snn.node.point.y()) {
-                    stack.push(new SNN(snn.node.left, 0));
-                    stack.push(new SNN(snn.node.right,
-                                       p.distanceSquaredTo(
-                                               new Point2D(p.x(), snn.node.point.y()))));
-                }
-                else {
-                    stack.push(new SNN(snn.node.right, 0));
-                    stack.push(new SNN(snn.node.left,
-                                       p.distanceSquaredTo(
-                                               new Point2D(p.x(), snn.node.point.y()))));
-                }
-            }
-        }
-
-        return champ;
+        boolean goLeft = root.d == 0
+                         ? context.p.x() < root.point.x()
+                         : context.p.y() < root.point.y();
+        _nearest(goLeft ? root.left : root.right, context);
+        if (context.p.distanceSquaredTo(new Point2D(
+                root.d == 0 ? root.point.x() : context.p.x(),
+                root.d == 0 ? context.p.y() : root.point.y()
+        )) < context.dist) _nearest(goLeft ? root.right : root.left, context);
     }
 
     public static void main(String[] args) {
