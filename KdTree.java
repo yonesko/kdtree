@@ -4,10 +4,9 @@
  *  Description:
  **************************************************************************** */
 
-import edu.princeton.cs.algs4.Interval1D;
 import edu.princeton.cs.algs4.Point2D;
-import edu.princeton.cs.algs4.Queue;
 import edu.princeton.cs.algs4.RectHV;
+import edu.princeton.cs.algs4.Stack;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -20,10 +19,7 @@ public class KdTree {
     private static class Node {
         private final Point2D point;
         /**
-         * |
-         * 0 |
-         * |
-         * 1 -----
+         * | 0 | | 1 -----
          */
         private final int d;
         private Node left, right;
@@ -65,7 +61,8 @@ public class KdTree {
                         return;
                     }
                     i = i.left;
-                } else {
+                }
+                else {
                     if (i.right == null) {
                         i.right = new Node(p, 1);
                         size++;
@@ -73,7 +70,8 @@ public class KdTree {
                     }
                     i = i.right;
                 }
-            } else {
+            }
+            else {
                 if (p.y() < i.point.y()) {
                     if (i.left == null) {
                         i.left = new Node(p, 0);
@@ -81,7 +79,8 @@ public class KdTree {
                         return;
                     }
                     i = i.left;
-                } else {
+                }
+                else {
                     if (i.right == null) {
                         i.right = new Node(p, 0);
                         size++;
@@ -107,19 +106,22 @@ public class KdTree {
                         return false;
                     }
                     i = i.left;
-                } else {
+                }
+                else {
                     if (i.right == null) {
                         return false;
                     }
                     i = i.right;
                 }
-            } else {
+            }
+            else {
                 if (p.y() < i.point.y()) {
                     if (i.left == null) {
                         return false;
                     }
                     i = i.left;
-                } else {
+                }
+                else {
                     if (i.right == null) {
                         return false;
                     }
@@ -154,20 +156,25 @@ public class KdTree {
         }
 
         if (n.d == 0) {
-            if(rect.xmax()<n.point.x()){
+            if (rect.xmax() < n.point.x()) {
                 _range(n.left, rect, points);
-            } else if(rect.xmin()>=n.point.x()){
+            }
+            else if (rect.xmin() >= n.point.x()) {
                 _range(n.right, rect, points);
-            } else {
+            }
+            else {
                 _range(n.left, rect, points);
                 _range(n.right, rect, points);
             }
-        } else {
-            if(rect.ymax()<n.point.y()){
+        }
+        else {
+            if (rect.ymax() < n.point.y()) {
                 _range(n.left, rect, points);
-            } else if(rect.ymin()>=n.point.y()){
+            }
+            else if (rect.ymin() >= n.point.y()) {
                 _range(n.right, rect, points);
-            } else {
+            }
+            else {
                 _range(n.left, rect, points);
                 _range(n.right, rect, points);
             }
@@ -176,7 +183,43 @@ public class KdTree {
 
     public Point2D nearest(Point2D p) {
         if (p == null) throw new IllegalArgumentException();
-        throw new UnsupportedOperationException("nearest");
+        if (root == null) return null;
+        Point2D champ = null;
+        double dist = Double.MAX_VALUE;
+        Stack<Node> stack = new Stack<>();
+        stack.push(root);
+        while (!stack.isEmpty()) {
+            Node node = stack.pop();
+            if (node == null) continue;
+            double curDist = p.distanceSquaredTo(node.point);
+            if (curDist < dist) {
+                champ = node.point;
+                dist = curDist;
+            }
+
+            if (node.d == 0) {
+                if (p.x() < node.point.x()) {
+                    stack.push(node.left);
+                    stack.push(node.right);
+                }
+                else {
+                    stack.push(node.right);
+                    stack.push(node.left);
+                }
+            }
+            else {
+                if (p.y() < node.point.y()) {
+                    stack.push(node.left);
+                    stack.push(node.right);
+                }
+                else {
+                    stack.push(node.right);
+                    stack.push(node.left);
+                }
+            }
+        }
+
+        return champ;
     }
 
     public static void main(String[] args) {
@@ -186,6 +229,6 @@ public class KdTree {
             throw new AssertionError();
         }
 
-        kdTree.range(new RectHV(1,1,3,3)) ;
+        kdTree.range(new RectHV(1, 1, 3, 3));
     }
 }
