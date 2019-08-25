@@ -193,19 +193,72 @@ public class KdTree {
         }
         if (p == null) throw new IllegalArgumentException();
         if (root == null) return null;
-        Point2D champ = null;
-        double dist = Double.MAX_VALUE;
+        Point2D champ = root.point;
+        double dist = root.point.distanceSquaredTo(p);
         Stack<SNN> stack = new Stack<>();
 
         if (root.d == 0) {
-            if(p.x()<root.point.x()) {
+            if (p.x() < root.point.x()) {
                 stack.push(new SNN(root.left, 0));
+                stack.push(new SNN(root.right,
+                                   p.distanceSquaredTo(new Point2D(root.point.x(), p.y()))));
+            }
+            else {
                 stack.push(new SNN(root.right, 0));
+                stack.push(new SNN(root.left,
+                                   p.distanceSquaredTo(new Point2D(root.point.x(), p.y()))));
+            }
+        }
+        else {
+            if (p.y() < root.point.y()) {
+                stack.push(new SNN(root.left, 0));
+                stack.push(new SNN(root.right,
+                                   p.distanceSquaredTo(new Point2D(p.x(), root.point.y()))));
+            }
+            else {
+                stack.push(new SNN(root.right, 0));
+                stack.push(new SNN(root.left,
+                                   p.distanceSquaredTo(new Point2D(p.x(), root.point.y()))));
             }
         }
 
         while (!stack.isEmpty()) {
-
+            SNN snn = stack.pop();
+            if (snn.node == null) continue;
+            if (snn.dist > dist) continue;
+            double curDist = snn.node.point.distanceSquaredTo(p);
+            if (curDist < dist) {
+                dist = curDist;
+                champ = snn.node.point;
+            }
+            if (snn.node.d == 0) {
+                if (p.x() < snn.node.point.x()) {
+                    stack.push(new SNN(snn.node.left, 0));
+                    stack.push(new SNN(snn.node.right,
+                                       p.distanceSquaredTo(
+                                               new Point2D(snn.node.point.x(), p.y()))));
+                }
+                else {
+                    stack.push(new SNN(snn.node.right, 0));
+                    stack.push(new SNN(snn.node.left,
+                                       p.distanceSquaredTo(
+                                               new Point2D(snn.node.point.x(), p.y()))));
+                }
+            }
+            else {
+                if (p.y() < snn.node.point.y()) {
+                    stack.push(new SNN(snn.node.left, 0));
+                    stack.push(new SNN(snn.node.right,
+                                       p.distanceSquaredTo(
+                                               new Point2D(p.x(), snn.node.point.y()))));
+                }
+                else {
+                    stack.push(new SNN(snn.node.right, 0));
+                    stack.push(new SNN(snn.node.left,
+                                       p.distanceSquaredTo(
+                                               new Point2D(p.x(), snn.node.point.y()))));
+                }
+            }
         }
 
         return champ;

@@ -18,7 +18,7 @@ import edu.princeton.cs.algs4.StdDraw;
 public class NearestNeighborVisualizer {
 
     public static void main(String[] args) {
-        args=new String[]{"input10.txt"};
+        args = new String[] { "input10.txt" };
         // initialize the two data structures with point from file
         String filename = args[0];
         In in = new In(filename);
@@ -55,7 +55,7 @@ public class NearestNeighborVisualizer {
 
             // draw in blue the nearest neighbor (using kd-tree algorithm)
             StdDraw.setPenColor(StdDraw.BLUE);
-           kdtree.nearest(query).draw();
+            kdtree.nearest(query).draw();
             StdDraw.show();
             StdDraw.pause(40);
         }
